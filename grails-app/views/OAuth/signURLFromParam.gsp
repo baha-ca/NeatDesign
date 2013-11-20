@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta name="layout" content="main"/>
-		<title>Welcome to NeatDesign</title>
+		<title>URL Signing</title>
 		<style type="text/css" media="screen">
 			#status {
 				background-color: #eee;
@@ -88,34 +88,21 @@
 				<li>App version: <g:meta name="app.version"/></li>
 				<li>Basic Security</li>
 				<li>Found on DirectApp Marketplaces</li>
-				<li></li>
-				<li></li>
-				<li></li>
-				<sec:access expression="hasRole('ROLE_ADMIN')">
-				<li><g:link controller="securityInfo" action="indexAdmin">Admin Access</g:link></li>
-				</sec:access>
 			</ul>
 			
 		</div>
 		<div id="page-body" role="main">
-			<h1>Welcome to SkyApps NeatDesign</h1>
-			<p>Congratulations, you have successfully landed on SkyApps first application! At the moment
-			   this is the default page, more pages will be added soon. The app helps designers show-case their neatest products.</p>
-
-			<!--div id="controller-list" role="navigation">
-				<h2>Available Controllers:</h2>
-				<ul>
-					<g:each var="c" in="${grailsApplication.controllerClasses.sort { it.fullName } }">
-						<li class="controller"><g:link controller="${c.logicalPropertyName}">${c.fullName}</g:link></li>
-					</g:each>
-				</ul>
-			</div-->
-			<p><g:link controller="OAuth" action="signRequest">Sign Outgoing Request: https://www.appdirect.com/AppDirect/rest/api/events/dummyChange</g:link></p>
-			<p><g:link controller="OAuth" action="signURL">Sign URL: https://www.appdirect.com/AppDirect/finishorder?success=true&accountIdentifer=Alice</g:link></p>
-			<sec:ifLoggedIn><p>Logged in as <sec:username/></p>
-			<p><g:link controller="Logout" action="index">Log out</g:link></p></sec:ifLoggedIn>
-			<sec:ifNotLoggedIn><p><g:link controller="login" action="auth">Login</g:link></p></sec:ifNotLoggedIn>
+		<g:if test="${fromRequest}">
+			<h1>Request URL Signed</h1>
+			<p>Response from Signed Request: ${signedUrl}</p>
+		</g:if>
+		<g:else>
+			<h1>URL Signed</h1>
+			<p>Response from Signed URL: ${signedUrl}</p>
+		</g:else>
+			
+			<p><g:link  url="..${createLinkTo(dir: '/')}">Home</g:link></p>
 		</div>
-		
+		<g:link url="..${createLinkTo(dir: '/')}admin">Admin Access</g:link>
 	</body>
 </html>

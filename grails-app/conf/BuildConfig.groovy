@@ -39,12 +39,15 @@ grails.project.dependency.resolution = {
 		
 		// needed repo since spring security plugin is still in RC release
 		mavenRepo 'http://repo.spring.io/milestone'
+		
+		mavenRepo 'http://oss.sonatype.org/content/repositories/signpost-releases'
     }
 
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
 
         // runtime 'mysql:mysql-connector-java:5.1.22'
+		compile	'oauth.signpost:signpost-core:1.2.1.2'
     }
 
     plugins {

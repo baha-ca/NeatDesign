@@ -90,6 +90,8 @@ log4j = {
            'org.springframework',
            'org.hibernate',
            'net.sf.ehcache.hibernate'
+		   
+//	debug 	'org.springframework.security'					// spring security plugin
 }
 
 
@@ -99,7 +101,6 @@ grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'org.skyapps.ne
 grails.plugin.springsecurity.authority.className = 'org.skyapps.neatdesign.security.Role'
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/':								['permitAll'],
-	'/indexAdmin':						['ROLE_ADMIN'],
 	'/index':							['permitAll'],
 	'/index.gsp':						['permitAll'],
 	'/**/js/**':						['permitAll'],
@@ -109,20 +110,39 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/login/**':						['permitAll'],
 	'/logout/**':						['permitAll'],
 	'/j_spring_security_switch_user':	['ROLE_ADMIN'],
-	'/j_spring_security_exit_user':		['permitAll']
+	'/j_spring_security_exit_user':		['permitAll'],
+	'/j_spring_security_logout':		['permitAll']
 ]
 
+grails.plugin.springsecurity.auth.forceHttps = true
+grails.plugin.springsecurity.logout.postOnly = false
+
+/*grails.plugin.springsecurity.secureChannel.useHeaderCheckChannelSecurity = true
+grails.plugin.springsecurity.secureChannel.definition = [
+	'/j_spring_security_check':	'REQUIRES_SECURE_CHANNEL',
+	'/login/**':				'REQUIRES_SECURE_CHANNEL',
+	'/**':						'REQUIRES_INSECURE_CHANNEL',
+	'/':						'REQUIRES_INSECURE_CHANNEL'
+]
+*/
+grails.plugin.springsecurity.secureChannel.definition = [
+	'/**':						'REQUIRES_SECURE_CHANNEL'
+]
 grails.plugin.springsecurity.rememberMe.persistent = true
 grails.plugin.springsecurity.rememberMe.cookieName = 'neatdesign_remember_me'
 grails.plugin.springsecurity.rememberMe.key = 'neatDesigns'
 grails.plugin.springsecurity.rememberMe.persistentToken.domainClassName = 'org.skyapps.neatdesign.security.PersistentLogin'
+grails.plugin.springsecurity.basic.realmName = 'NeatDesign Realm'
+grails.plugin.springsecurity.digest.realmName = 'NeatDesign Realm'
+grails.plugin.springsecurity.digest.key = 'neatDesigns'
 
 
 grails.plugin.springsecurity.openid.domainClass = 'org.skyapps.neatdesign.security.OpenID'
 
 grails.plugin.springsecurity.useSecurityEventListener = true
+grails.plugin.springsecurity.ui.register.postRegisterUrl = '/welcome'
 
-grails.plugin.springsecurity. onInteractiveAuthenticationSuccessEvent = { e, appCtx -> 
+/*grails.plugin.springsecurity. onInteractiveAuthenticationSuccessEvent = { e, appCtx -> 
 	log.print('NeatDesign=Spring Security Event - onInteractiveAuthenticationSuccessEvent: '+e)
 }
 	
@@ -140,4 +160,7 @@ grails.plugin.springsecurity. onAuthenticationSwitchUserEvent = { e, appCtx ->
 
 grails.plugin.springsecurity. onAuthorizationEvent = { e, appCtx ->
 	log.print('NeatDesign=Spring Security Event - onAuthorizationEvent: '+e)
-}
+}*/
+
+appdirect.secret = 'cwfhGKg6E0L2mXWT'
+appdirect.consumerkey = 'neatdesign-7105'

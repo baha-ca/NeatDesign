@@ -1,7 +1,7 @@
 class UrlMappings {
 
 	static mappings = {
-		/*"/login/auth" {
+		"/login/auth" {
 			controller = 'openId'
 			action = 'auth'
 		 }
@@ -9,7 +9,7 @@ class UrlMappings {
 		"/login/openIdCreateAccount" {
 			controller = 'openId'
 			action = 'createAccount'
-		}*/
+		}
 		
 		"/$controller/$action?/$id?"{
 			constraints {
