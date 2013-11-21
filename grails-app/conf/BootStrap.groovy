@@ -7,13 +7,19 @@ class BootStrap {
     def init = { servletContext ->
 		def roleAdmin = new Role(authority: 'ROLE_ADMIN').save()
 		def roleUser = new Role(authority: 'ROLE_USER').save()
+		def roleManager = new Role(authority: 'ROLE_MANAGER').save()
 		
-		def user = new User(username: 'user', password: 'password', enabled: true).save() 
-		def admin = new User(username: 'admin', password: 'password', enabled: true).save()
+		def user = new User(username: 'user', password: 'userPass', enabled: true).save() 
+		def admin = new User(username: 'admin', password: 'adminPass', enabled: true).save()
+		def manager = new User(username: 'mgr', password: 'mgrPass', enabled: true).save()
+		
 		
 		UserRole.create user, roleUser 
 		UserRole.create admin, roleUser 
 		UserRole.create admin, roleAdmin, true 
+		
+		UserRole.create manager, roleUser
+		UserRole.create manager, roleManager
 		
     }
 	
