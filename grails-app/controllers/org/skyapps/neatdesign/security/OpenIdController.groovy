@@ -75,12 +75,13 @@ class OpenIdController implements InitializingBean {
 			redirect uri: config.successHandler.defaultTargetUrl
 			return
 		}
-
+		
 		[openIdPostUrl: "$request.contextPath$openIDAuthenticationFilter.filterProcessesUrl",
 		 daoPostUrl:    "$request.contextPath$config.apf.filterProcessesUrl",
 		 persistentRememberMe: config.rememberMe.persistent,
 		 rememberMeParameter: config.rememberMe.parameter,
-		 openidIdentifier: config.openid.claimedIdentityFieldName]
+		 openidIdentifier: config.openid.claimedIdentityFieldName,
+		 openidPassedURL: params.openid_url]
 	}
 
 	/**
