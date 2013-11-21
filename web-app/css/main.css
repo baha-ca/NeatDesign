@@ -594,3 +594,14 @@ a.skip {
 	position: absolute;
 	left: -9999px;
 }
+
+.actions {
+   /* float: right;*/
+    list-style-type: none; 
+}
+.actions li {
+    background: none scroll right center rgba(0, 0, 0, 0);
+    float: right;
+    padding: 0 17px;
+}
+

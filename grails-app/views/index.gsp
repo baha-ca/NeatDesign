@@ -102,19 +102,17 @@
 			<p>Congratulations, you have successfully landed on SkyApps first application! At the moment
 			   this is the default page, more pages will be added soon. The app helps designers show-case their neatest products.</p>
 
-			<!--div id="controller-list" role="navigation">
+			<%--div id="controller-list" role="navigation">
 				<h2>Available Controllers:</h2>
 				<ul>
 					<g:each var="c" in="${grailsApplication.controllerClasses.sort { it.fullName } }">
 						<li class="controller"><g:link controller="${c.logicalPropertyName}">${c.fullName}</g:link></li>
 					</g:each>
 				</ul>
-			</div-->
+			</div>
 			<p><g:link controller="OAuth" action="signRequest">Sign Outgoing Request: https://www.appdirect.com/AppDirect/rest/api/events/dummyChange</g:link></p>
-			<p><g:link controller="OAuth" action="signURL">Sign URL: https://www.appdirect.com/AppDirect/finishorder?success=true&accountIdentifer=Alice</g:link></p>
-			<sec:ifLoggedIn><p>Logged in as <sec:username/></p>
-			<p><g:link controller="Logout" action="index">Log out</g:link></p></sec:ifLoggedIn>
-			<sec:ifNotLoggedIn><p><g:link controller="login" action="auth">Login</g:link></p></sec:ifNotLoggedIn>
+			<p><g:link controller="OAuth" action="signURL">Sign URL: https://www.appdirect.com/AppDirect/finishorder?success=true&accountIdentifer=Alice</g:link></p--%>
+			
 		</div>
 		
 	</body>

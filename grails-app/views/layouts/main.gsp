@@ -18,7 +18,15 @@
 		<r:layoutResources />
 	</head>
 	<body>
-		<div id="grailsLogo" role="banner"><a href="http://neatdesign.cfapps.io/"><img src="${resource(dir: 'images', file: 'skyApps_logo.png')}" alt="SkyApps NeatDesign"/></a></div>
+		<div id="grailsLogo" role="banner"><ul class="actions">
+			<li"><a href="http://neatdesign.cfapps.io/"><img src="${resource(dir: 'images', file: 'skyApps_logo.png')}" alt="SkyApps NeatDesign"/></a></li>
+			<li class="last">
+				<sec:ifLoggedIn><p>Logged in as <sec:username/></p>
+				<p><g:link controller="Logout" action="index">Log out</g:link></p></sec:ifLoggedIn>
+				<sec:ifNotLoggedIn><p><g:link controller="login" action="auth">Login</g:link></p></sec:ifNotLoggedIn>
+			</li>
+		</ul>
+		</div>
 		<g:layoutBody/>
 		<div class="footer" role="contentinfo"></div>
 		<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
