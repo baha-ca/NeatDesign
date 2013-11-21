@@ -21,7 +21,7 @@
 		<div id="grailsLogo" role="banner"><ul class="actions">
 			<li"><a href="http://neatdesign.cfapps.io/"><img src="${resource(dir: 'images', file: 'skyApps_logo.png')}" alt="SkyApps NeatDesign"/></a></li>
 			<li class="last">
-				<sec:ifLoggedIn><p>Logged in as <sec:username/></p>
+				<sec:ifLoggedIn><p>Logged in as <sec:loggedInUserInfo field="authorities"/></p>
 				<p><g:link controller="Logout" action="index">Log out</g:link></p></sec:ifLoggedIn>
 				<sec:ifNotLoggedIn><p><g:link controller="login" action="auth">Login</g:link></p></sec:ifNotLoggedIn>
 			</li>
