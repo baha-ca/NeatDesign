@@ -5,27 +5,40 @@ import oauth.signpost.basic.DefaultOAuthConsumer
 import oauth.signpost.exception.OAuthException
 import grails.converters.*
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.RandomUtils;
+import org.skyapps.neatdesign.customer.Subscription;
 import org.skyapps.neatdesign.security.Role
 import org.skyapps.neatdesign.security.User
 import org.skyapps.neatdesign.security.UserRole
+
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(['permitAll'])
 class AppController {
-
+	def userCache
+	
     def index() { }
 	
 	def create() { 
-		render handleAppEvent( params.url, AppEvent.SUBSCRIBE )
+		render handleAppEvent( params.url, AppEvent.SUBSCRIPTION_ORDER )
 	}
 	def change() { 
-		handleAppEvent( params.url, AppEvent.CHANGE )
+		render handleAppEvent( params.url, AppEvent.SUBSCRIPTION_CHANGE )
 	}
 	def cancel() {
-		handleAppEvent( params.url, AppEvent.UNSUBSCRIBE )
+		render handleAppEvent( params.url, AppEvent.SUBSCRIPTION_CANCEL )
 	}
 	def status() {
-		handleAppEvent( params.url, AppEvent.NOTICE )
+		render handleAppEvent( params.url, AppEvent.SUBSCRIPTION_NOTICE )
+	}
+	
+	def addUser(){
+		render handleAppEvent( params.url, AppEvent.USER_ASSIGNMENT )
+	}
+	
+	def removeUser(){
+		render handleAppEvent( params.url, AppEvent.USER_UNASSIGNMENT )
 	}
 	
 	protected Object handleAppEvent(String eventURL, AppEvent eventType){
@@ -34,16 +47,20 @@ class AppController {
 			eventRequest = signURL(eventURL)
 			
 			def responseMessage = parseAppResponse(eventRequest, eventType)
-			
-			response.contentType = 'application/xml'
+			log.info("Message to be sent back: "+responseMessage)
+			response.contentType = 'text/xml'
 			response.setHeader("Content-Length", responseMessage.length().toString())
 			return responseMessage
 		} catch (OAuthException oae) {
 			response.status = 401
-			return "Failed to sign event URL: " + eventURL + ". Exception message: " + oae.getMessage()
+			def msg = "Failed to sign event URL: " + eventURL + ". Exception message: " + oae.message
+			log.error(msg)
+			return msg
 		} catch (IOException ioe) {
 			response.status = 405
-			return "Communication problem with event URL: " + eventURL + ". Exception message: " + ioe.getMessage()
+			def msg ="Communication problem with event URL: " + eventURL + ". Exception message: " + ioe.message
+			log.error(msg)
+			return msg
 		} finally {
 			if (eventRequest && eventRequest.connected){
 				eventRequest.disconnect();
@@ -60,68 +77,104 @@ class AppController {
 	}
 	
 	protected String parseAppResponse(HttpURLConnection tokenRequest, AppEvent eventType){
-		log.info("Response: " + tokenRequest.getResponseCode() + " "
-			+ tokenRequest.getResponseMessage());
-
-		def rootNode = tokenRequest.inputStream.readLines().toString()
-		rootNode = rootNode.substring(1, rootNode.length()-1)
+		if (log.debugEnabled){
+			log.debug("Response: " + tokenRequest.responseCode + " "
+				+ tokenRequest.responseMessage)
+		}
+		def rootNode = tokenRequest.inputStream.readLines().toString() // maybe XML.parse(tokenRequest) ??
+		rootNode = rootNode.substring(1, rootNode.length()-1) // strip square bracket
 		rootNode = XML.parse(rootNode)
-		log.debug(rootNode)
+		if (log.debugEnabled){
+			log.debug("Response XML node: "+rootNode)
+			log.debug("Response's event type: " + rootNode.type.text())
+			log.debug("   Market place: " + rootNode.marketplace.partner.text())
+		}
+		// make sure payload contains the right Event type and marketplace
+		if (rootNode.type.text() != eventType.toString() || !rootNode.marketplace.partner.text()){
+			return AppUtil.createFailureResponse(eventType, ReturnCode.INVALID_RESPONSE)
+		}
+		
 		switch (eventType){
-			case AppEvent.SUBSCRIBE:
-				def uniqueId = createNewAccount(rootNode.creator, rootNode.payload.company)
-				return createSuccessResponse(uniqueId, eventType)
-			case AppEvent.CHANGE:
-			case AppEvent.UNSUBSCRIBE:
-			case AppEvent.NOTICE:
+			case AppEvent.SUBSCRIPTION_ORDER:
+				return createNewSubscription(rootNode.marketplace, rootNode.creator, rootNode.payload)
+			case AppEvent.SUBSCRIPTION_CHANGE:
+			case AppEvent.SUBSCRIPTION_CANCEL:
+			case AppEvent.USER_ASSIGNMENT:
+			case AppEvent.USER_UNASSIGNMENT:
+			case AppEvent.SUBSCRIPTION_NOTICE:
+				return changeOrCancelSubscription(rootNode.marketplace, rootNode.payload, eventType)
 			default :
-				return "Error event type unknown"
+				return AppUtil.createFailureResponse(eventType, ReturnCode.CONFIGURATION_ERROR)
 		}
 	}
 	
-	protected String createNewAccount(def accountXml, def companyXml){
-		def firstName = accountXml.firstName.text()
-		String uniqueAccountId = accountXml.lastName.text().charAt(0).toString() + firstName.replaceAll(' ', '').capitalize() + companyXml.name.text().replaceAll(' ', '').capitalize()
-		boolean created = User.withTransaction { status ->
-			
-			def password = "secret" //encodePassword("secret") // for now, default password is secret used for new user creation for non OpenID authentication only
-			def user = User.newInstance(username: uniqueAccountId,
-										password: password,
-										enabled: true)
-
-			user.addToOpenIds(url: accountXml.openId.text())
-
-			if (!user.save()) {
-				return false
-			}
-
-			
-			UserRole.create user, Role.findWhere("authority": "ROLE_OPENID")
-			return true
+	protected String createNewSubscription(def marketplaceXml, def accountXml, def payloadXml){
+		def newUserId = AppUtil.generateNewUsername(accountXml, payloadXml.company)
+		if (User.findWhere(username: newUserId)){
+			return AppUtil.createFailureResponse(AppEvent.SUBSCRIPTION_ORDER, ReturnCode.USER_ALREADY_EXISTS)
 		}
-		if (created)
-			return uniqueAccountId
-			
-		return null
+		
+		Long accountId = AppUtil.addNewSubscription(marketplaceXml, accountXml, payloadXml, newUserId)
+		
+		if (accountId)
+			return AppUtil.createSuccessResponse(AppEvent.SUBSCRIPTION_ORDER, accountId)
+		else
+			return AppUtil.createFailureResponse(AppEvent.SUBSCRIPTION_ORDER, ReturnCode.UNKNOWN_ERROR)
+	}
+
+	protected String changeOrCancelSubscription(def marketplaceXml, def payloadXml, AppEvent eventType){
+		def subscription = Subscription.findWhere(id: Long.parseLong(payloadXml.account.accountIdentifier.text()))
+		if (!subscription){
+			return AppUtil.createFailureResponse(eventType, ReturnCode.ACCOUNT_NOT_FOUND)
+		}
+		
+		if (subscription.marketplace != marketplaceXml.partner.text()){ // validate the right marketplace
+			return AppUtil.createFailureResponse(eventType, ReturnCode.CONFIGURATION_ERROR)
+		}
+		
+		boolean actionCompleted = false
+		
+		switch (eventType){
+			case AppEvent.SUBSCRIPTION_CHANGE:
+				actionCompleted = AppUtil.changeSubscription(payloadXml, subscription)
+				break;
+			case AppEvent.SUBSCRIPTION_CANCEL:
+				refreshUserCache(subscription)
+				actionCompleted = AppUtil.cancelSubscription(payloadXml, subscription)
+				break;
+			case AppEvent.USER_ASSIGNMENT:
+				def newUserId = AppUtil.generateNewUsername(payloadXml.user, subscription.company)
+				User userFound = User.findWhere(username: newUserId)
+				// A manager exists as long as the subscription exists, if she was unsubscribed, 
+				// the app will disable her instead of deleting her from the system. She will be removed 
+				// from the users list of the subscription if she was deleted but will remain the manager
+				//  of the subscription. Hence the condition below
+				if (userFound && subscription.manager != userFound){
+					return AppUtil.createFailureResponse(AppEvent.SUBSCRIPTION_ORDER, ReturnCode.USER_ALREADY_EXISTS)
+				}
+				actionCompleted = AppUtil.createUser(newUserId, userFound, payloadXml, subscription)
+				break;
+			case AppEvent.USER_UNASSIGNMENT:
+				refreshUserCache(subscription)
+				actionCompleted = AppUtil.removeUser(payloadXml, subscription)
+				break;
+			case AppEvent.SUBSCRIPTION_NOTICE:
+				actionCompleted = AppUtil.createSubscriptionNotice(payloadXml, subscription)
+		}
+		
+		if (actionCompleted)
+			return AppUtil.createSuccessResponse(eventType)
+		else
+			return AppUtil.createFailureResponse(eventType, ReturnCode.UNKNOWN_ERROR)
 		
 	}
 	
-	protected Object createSuccessResponse(String uniqueId, AppEvent eventType){
-		def xmlScript = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<result>
-    <success>true</success>
-    <message>Account creation successful</message>
-    <accountIdentifier>new-account-identifier</accountIdentifier>
-</result>'''
-		xmlScript = xmlScript.replace("<accountIdentifier>new-account-identifier</accountIdentifier>", "<accountIdentifier>" + uniqueId + "</accountIdentifier>")
-		
-		return xmlScript
+	protected refreshUserCache(subscription){
+		subscription.users.each{
+			userCache.removeUserFromCache it.username
+		}
 	}
 
-}
-
-enum AppEvent {
-	SUBSCRIBE, CHANGE, UNSUBSCRIBE, NOTICE
 }
 
 

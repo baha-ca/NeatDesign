@@ -6,7 +6,7 @@ import oauth.signpost.OAuthConsumer
 import oauth.signpost.basic.DefaultOAuthConsumer
 import oauth.signpost.signature.QueryStringSigningStrategy
 
-@Secured(['permitAll'])
+@Secured(['ROLE_ADMIN'])
 class OAuthController {
 
 	def signRequest() {

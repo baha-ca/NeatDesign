@@ -114,20 +114,12 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/j_spring_security_logout':		['permitAll']
 ]
 
-grails.plugin.springsecurity.auth.forceHttps = true
+//grails.plugin.springsecurity.auth.forceHttps = true
 grails.plugin.springsecurity.logout.postOnly = false
 
-/*grails.plugin.springsecurity.secureChannel.useHeaderCheckChannelSecurity = true
-grails.plugin.springsecurity.secureChannel.definition = [
-	'/j_spring_security_check':	'REQUIRES_SECURE_CHANNEL',
-	'/login/**':				'REQUIRES_SECURE_CHANNEL',
-	'/**':						'REQUIRES_INSECURE_CHANNEL',
-	'/':						'REQUIRES_INSECURE_CHANNEL'
-]
-*/
-grails.plugin.springsecurity.secureChannel.definition = [
+/*grails.plugin.springsecurity.secureChannel.definition = [
 	'/**':						'REQUIRES_SECURE_CHANNEL'
-]
+]*/
 grails.plugin.springsecurity.rememberMe.persistent = true
 grails.plugin.springsecurity.rememberMe.cookieName = 'neatdesign_remember_me'
 grails.plugin.springsecurity.rememberMe.key = 'neatDesigns'
@@ -142,25 +134,5 @@ grails.plugin.springsecurity.openid.domainClass = 'org.skyapps.neatdesign.securi
 grails.plugin.springsecurity.useSecurityEventListener = true
 grails.plugin.springsecurity.ui.register.postRegisterUrl = '/welcome'
 
-/*grails.plugin.springsecurity. onInteractiveAuthenticationSuccessEvent = { e, appCtx -> 
-	log.print('NeatDesign=Spring Security Event - onInteractiveAuthenticationSuccessEvent: '+e)
-}
-	
-grails.plugin.springsecurity. onAbstractAuthenticationFailureEvent = { e, appCtx -> 
-	log.print('NeatDesign=Spring Security Event - onAbstractAuthenticationFailureEvent: '+e)
-}
-
-grails.plugin.springsecurity. onAuthenticationSuccessEvent = { e, appCtx ->
-	log.print('NeatDesign=Spring Security Event - onAuthenticationSuccessEvent: '+e)
-}
-
-grails.plugin.springsecurity. onAuthenticationSwitchUserEvent = { e, appCtx ->
-	log.print('NeatDesign=Spring Security Event - onAuthenticationSwitchUserEvent: '+e)
-}
-
-grails.plugin.springsecurity. onAuthorizationEvent = { e, appCtx ->
-	log.print('NeatDesign=Spring Security Event - onAuthorizationEvent: '+e)
-}*/
-
-appdirect.secret = 'cwfhGKg6E0L2mXWT'
-appdirect.consumerkey = 'neatdesign-7105'
+appdirect.secret = 'secret'
+appdirect.consumerkey = 'key'
