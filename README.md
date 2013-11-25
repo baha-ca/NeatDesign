@@ -8,7 +8,8 @@ Features:
 * Subscription to the app
 * Unsubscribe from the app
 * Multi-package purchase
-* Add-on support
+* Add-on support (partial, coming soon)
+* Event notification support from the marketplace
 * Add users to a subscription
 * Remove users from a subscription
 * Logout redirects to the subscriber's marketplace
