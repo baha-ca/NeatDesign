@@ -7,7 +7,7 @@ Features:
 * OpenId support
 * Subscription to the app
 * Unsubscribe from the app
-* Multi-package purchase
+* Multi-edition upgrade/down-grade support
 * Add-on support (partial, coming soon)
 * Event notification support from the marketplace
 * Add users to a subscription
