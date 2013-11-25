@@ -225,10 +225,12 @@ class AppUtil {
 			subscription.users.remove(userToDelete)
 			
 			if (userToDelete == subscription.manager){ // if user to delete is the manager, then disable instead of delete, TODO allow setting a different manager for the subscription
-				userToDelete.enabled = true
+				userToDelete.enabled = false
 				if (!userToDelete.save()){
 					return false
 				}
+				
+				return true
 			}
 			
 			UserRole.removeAll(userToDelete)
