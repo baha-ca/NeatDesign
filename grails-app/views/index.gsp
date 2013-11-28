@@ -85,8 +85,10 @@
 		<div id="status" role="complementary">
 			<h1>Application Status</h1>
 			<ul>
+				<sec:ifLoggedIn>
 				<li>App version: <g:meta name="app.version"/></li>
 				<li>Basic Security</li>
+				</sec:ifLoggedIn>
 				<li>Found on DirectApp Marketplaces</li>
 				<li></li>
 				<li></li>
@@ -102,6 +104,9 @@
 			<p>Congratulations, you have successfully landed on SkyApps first application! At the moment
 			   this is the default page, more pages will be added soon. The app helps designers show-case their neatest products.</p>
 
+			<sec:ifAllGranted roles="ROLE_MANAGER">
+			<h2>You are the manager of this subscription</h2>
+			</sec:ifAllGranted>
 			<%--div id="controller-list" role="navigation">
 				<h2>Available Controllers:</h2>
 				<ul>
