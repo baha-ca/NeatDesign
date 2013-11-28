@@ -11,32 +11,32 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 
 class SimpleUrlLogoutSuccessHandlerMarketRedirect extends SimpleUrlLogoutSuccessHandler {
 
-			private static final ThreadLocal<Authentication> AUTH_HOLDER = new ThreadLocal<Authentication>()
-			def appService
-			
-			void onLogoutSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authe) throws IOException ,ServletException {
-				AUTH_HOLDER.set authe
-				try{
-					super.handle(req, resp, authe)
-				}finally{
-					AUTH_HOLDER.remove()
-				}
-			}
-			
-			@Override
-			protected String determineTargetUrl(HttpServletRequest req, HttpServletResponse resp) {
-				Authentication authe = AUTH_HOLDER.get()
-				String defaultUrl = super.determineTargetUrl(req, resp)
-				String marketplaceUrl
+	private static final ThreadLocal<Authentication> AUTH_HOLDER = new ThreadLocal<Authentication>()
+	def appService
+	
+	void onLogoutSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authe) throws IOException ,ServletException {
+		AUTH_HOLDER.set authe
+		try{
+			super.handle(req, resp, authe)
+		}finally{
+			AUTH_HOLDER.remove()
+		}
+	}
+	
+	@Override
+	protected String determineTargetUrl(HttpServletRequest req, HttpServletResponse resp) {
+		Authentication authe = AUTH_HOLDER.get()
+		String defaultUrl = super.determineTargetUrl(req, resp)
+		String marketplaceUrl
 
-				if (authe) {
-					marketplaceUrl = appService.retrieveSubscriptionfromOpenId(authe.principal.username)
-				}
-				
-				if (marketplaceUrl){
-					return marketplaceUrl
-				}else{
-					return defaultUrl
-				}
-			}
+		if (authe) {
+			marketplaceUrl = appService.retrieveSubscriptionfromOpenId(authe.principal.username)
+		}
+		
+		if (marketplaceUrl){
+			return marketplaceUrl
+		}else{
+			return defaultUrl
+		}
+	}
 }
