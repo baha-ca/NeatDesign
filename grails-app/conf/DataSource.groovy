@@ -24,7 +24,7 @@ environments {
         }
     }
     production {
-        dataSource {
+        /*dataSource {
             dbCreate = "update"
             url = "jdbc:h2:prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
             pooled = true
@@ -38,6 +38,14 @@ environments {
                testOnReturn=true
                validationQuery="SELECT 1"
             }
-        }
+        }*/
+		dataSource {
+			dbCreate = "create"
+			url = 'jdbc:mysql://localhost/db?useUnicode=true&characterEncoding=utf8'
+			dialect = org.hibernate.dialect.MySQL5InnoDBDialect
+			driverClassName = 'com.mysql.jdbc.Driver'
+			username = 'user'
+			password = "password"
+		}
     }
 }
